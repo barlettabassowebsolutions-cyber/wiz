@@ -35,7 +35,7 @@ export default function Hero({ onAbout }) {
             to="/shop"
             className="inline-flex items-center gap-2 rounded-full bg-[#d8ef9c] px-7 py-3 text-sm font-semibold uppercase tracking-widest text-[#0A0A0A] transition hover:brightness-95"
           >
-            Browse Our Shop <ArrowRight className="h-4 w-4" />
+            Browse Our Shop <ArrowRight aria-hidden="true" className="h-4 w-4" />
           </Link>
           <button
             onClick={onAbout}
@@ -46,10 +46,10 @@ export default function Hero({ onAbout }) {
         </div>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-white/80">
           <span className="inline-flex items-center gap-1.5">
-            <MapPin className="h-4 w-4" /> {SHOP.shortAddress}
+            <MapPin aria-hidden="true" className="h-4 w-4" /> {SHOP.shortAddress}
           </span>
           <a href={SHOP.tel} className="inline-flex items-center gap-1.5 font-semibold text-white hover:underline">
-            <Phone className="h-4 w-4" /> {SHOP.phone}
+            <Phone aria-hidden="true" className="h-4 w-4" /> {SHOP.phone}
           </a>
           <a
             href={SHOP.facebook}
@@ -57,7 +57,7 @@ export default function Hero({ onAbout }) {
             rel="noreferrer"
             className="inline-flex items-center gap-1.5 hover:underline"
           >
-            <Facebook className="h-4 w-4" /> Facebook
+            <Facebook aria-hidden="true" className="h-4 w-4" /> Facebook
           </a>
         </div>
       </div>

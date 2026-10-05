@@ -62,6 +62,30 @@ function entity(name, seed = []) {
   }
 }
 
+// Earlier builds pointed the starting products at photos from the shop's old Wix site. A
+// browser that saved its own product list (after an edit in /admin) still has those, so
+// move any untouched starting product onto its new photo, once.
+function migrateSeedImages() {
+  try {
+    if (localStorage.getItem(PREFIX + 'images_v2')) return
+    const rows = read('Product', null)
+    if (rows) {
+      const seedById = new Map(seedProducts.map((p) => [p.id, p]))
+      write(
+        'Product',
+        rows.map((row) =>
+          seedById.has(row.id) && row.image?.includes('static.wixstatic.com')
+            ? { ...row, image: seedById.get(row.id).image }
+            : row,
+        ),
+      )
+    }
+    localStorage.setItem(PREFIX + 'images_v2', '1')
+  } catch {}
+}
+
+migrateSeedImages()
+
 const SESSION_KEY = 'wiu_admin'
 const ADMIN_PASSCODE = import.meta.env.VITE_ADMIN_PASSCODE || 'wrapitup'
 

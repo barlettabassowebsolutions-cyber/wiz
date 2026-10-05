@@ -7,7 +7,7 @@ export const SHOP = {
   tel: 'tel:6315984400',
   facebook: 'https://www.facebook.com/wrappingitup',
   directions: 'https://www.google.com/maps/search/?api=1&query=180+Park+Avenue%2C+Amityville%2C+NY+11701',
-  logo: 'https://static.wixstatic.com/media/953fcd_d5d611dbcf814a578560eb2c02c3a47d~mv2.jpg',
+  logo: '/shop-photo.webp',
 }
 
 export const occasions = [

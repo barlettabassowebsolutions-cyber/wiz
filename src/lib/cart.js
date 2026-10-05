@@ -1,12 +1,18 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { seedProducts } from '@/data/products'
 
 const STORAGE_KEY = 'wiu_cart'
 const listeners = new Set()
+const seedImages = new Map(seedProducts.map((p) => [p.id, p.image]))
 
 function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
+    const saved = raw ? JSON.parse(raw) : []
+    // Baskets added before the product photos changed still point at the old Wix photos.
+    return saved.map((i) =>
+      i.image?.includes('static.wixstatic.com') && seedImages.has(i.id) ? { ...i, image: seedImages.get(i.id) } : i,
+    )
   } catch {
     return []
   }

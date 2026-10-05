@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Minus, Plus, Trash2, X } from 'lucide-react'
 import { client } from '@/api/client'
 import { cart, useCartItems, useCartTotal } from '@/lib/cart'
@@ -14,6 +14,53 @@ export default function CartDrawer({ open, onClose }) {
   const [form, setForm] = useState({ name: '', phone: '', pickup_date: '' })
   const [placing, setPlacing] = useState(false)
   const [error, setError] = useState('')
+  const panelRef = useRef(null)
+  const titleRef = useRef(null)
+  const closeRef = useRef(null)
+
+  // Behave like a modal dialog: Tab stays inside, Escape closes, and focus goes back to
+  // whatever opened it.
+  useEffect(() => {
+    if (!open) return
+    const opener = document.activeElement
+
+    function onKeyDown(e) {
+      if (e.key === 'Escape') {
+        closeRef.current?.()
+        return
+      }
+      if (e.key !== 'Tab') return
+      const focusable = panelRef.current?.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])',
+      )
+      if (!focusable?.length) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      const current = document.activeElement
+      if (!panelRef.current.contains(current) || current === titleRef.current) {
+        e.preventDefault()
+        ;(e.shiftKey ? last : first).focus()
+      } else if (e.shiftKey && current === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && current === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      if (opener?.isConnected) opener.focus()
+    }
+  }, [open])
+
+  // Move focus to the title whenever the drawer opens or changes step, so screen readers
+  // announce where the user is.
+  useEffect(() => {
+    if (open) titleRef.current?.focus()
+  }, [open, step])
 
   if (!open) return null
 
@@ -22,6 +69,7 @@ export default function CartDrawer({ open, onClose }) {
     setError('')
     onClose()
   }
+  closeRef.current = close
 
   async function placeOrder(e) {
     e.preventDefault()
@@ -53,12 +101,20 @@ export default function CartDrawer({ open, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
-      <div className="absolute inset-0 bg-black/40" onClick={close} />
-      <div className="relative flex h-full w-full max-w-md flex-col bg-[hsl(var(--background))] shadow-2xl">
+      <div className="absolute inset-0 bg-black/40" onClick={close} aria-hidden="true" />
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cart-drawer-title"
+        className="relative flex h-full w-full max-w-md flex-col bg-[hsl(var(--background))] shadow-2xl"
+      >
         <div className="flex items-center justify-between border-b border-[hsl(var(--border))] px-5 py-4">
-          <h2 className="font-heading text-xl font-bold">{title}</h2>
-          <button onClick={close} className="rounded-full p-1 hover:bg-[hsl(var(--muted))]">
-            <X className="h-5 w-5" />
+          <h2 id="cart-drawer-title" ref={titleRef} tabIndex={-1} className="font-heading text-xl font-bold outline-none">
+            {title}
+          </h2>
+          <button onClick={close} aria-label="Close basket" className="rounded-full p-1 hover:bg-[hsl(var(--muted))]">
+            <X aria-hidden="true" className="h-5 w-5" />
           </button>
         </div>
 
@@ -102,25 +158,28 @@ export default function CartDrawer({ open, onClose }) {
                           <span className="font-medium leading-tight">{item.name}</span>
                           <button
                             onClick={() => cart.remove(item.id)}
+                            aria-label={`Remove ${item.name}`}
                             className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--destructive))]"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 aria-hidden="true" className="h-4 w-4" />
                           </button>
                         </div>
                         <span className="text-sm text-[hsl(var(--muted-foreground))]">${item.price.toFixed(2)}</span>
                         <div className="mt-1 flex items-center gap-2">
                           <button
                             onClick={() => cart.setQty(item.id, item.qty - 1)}
+                            aria-label={`One less ${item.name}`}
                             className="rounded-full bg-[hsl(var(--muted))] p-1 hover:bg-[hsl(var(--border))]"
                           >
-                            <Minus className="h-3 w-3" />
+                            <Minus aria-hidden="true" className="h-3 w-3" />
                           </button>
                           <span className="w-6 text-center text-sm font-semibold">{item.qty}</span>
                           <button
                             onClick={() => cart.setQty(item.id, item.qty + 1)}
+                            aria-label={`One more ${item.name}`}
                             className="rounded-full bg-[hsl(var(--muted))] p-1 hover:bg-[hsl(var(--border))]"
                           >
-                            <Plus className="h-3 w-3" />
+                            <Plus aria-hidden="true" className="h-3 w-3" />
                           </button>
                         </div>
                       </div>

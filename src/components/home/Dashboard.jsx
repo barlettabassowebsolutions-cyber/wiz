@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
@@ -37,6 +38,23 @@ const quickActions = [
   { label: 'Facebook', href: SHOP.facebook, icon: Facebook, external: true },
 ]
 
+// True while the element's content is wider than the element itself.
+function useOverflowsX(ref, deps) {
+  const [overflows, setOverflows] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const check = () => setOverflows(el.scrollWidth > el.clientWidth + 1)
+    check()
+    const observer = new ResizeObserver(check)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, deps)
+
+  return overflows
+}
+
 function SectionTile({ id, label, hint, icon: Icon }) {
   return (
     <Link
@@ -44,7 +62,7 @@ function SectionTile({ id, label, hint, icon: Icon }) {
       className="group flex flex-col items-start gap-3 rounded-2xl bg-[hsl(var(--background))] p-4 ring-1 ring-[hsl(var(--border))] transition hover:bg-[#d8ef9c]/30 hover:ring-[#d8ef9c]"
     >
       <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#d8ef9c]">
-        <Icon className="h-5 w-5 text-[#0A0A0A]" />
+        <Icon aria-hidden="true" className="h-5 w-5 text-[#0A0A0A]" />
       </span>
       <span>
         <span className="block text-sm font-semibold leading-tight">{label}</span>
@@ -54,7 +72,7 @@ function SectionTile({ id, label, hint, icon: Icon }) {
   )
 }
 
-function BasketSummary({ onOpenCart }) {
+function BasketSummary({ onOpenCart, hasFeatured }) {
   const count = useCartCount()
   const total = useCartTotal()
   const button =
@@ -63,14 +81,18 @@ function BasketSummary({ onOpenCart }) {
   return (
     <div className="rounded-2xl bg-[#0A0A0A] p-5 text-[#d8ef9c]">
       <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#d8ef9c]/70">
-        <ShoppingBag className="h-4 w-4" /> Your basket
+        <ShoppingBag aria-hidden="true" className="h-4 w-4" /> Your basket
       </p>
       {count === 0 ? (
         <>
           <p className="mt-2 font-heading text-2xl font-bold">Empty for now</p>
-          <p className="mt-1 text-sm text-[#d8ef9c]/70">Add a featured basket below, or browse the whole shop.</p>
+          <p className="mt-1 text-sm text-[#d8ef9c]/70">
+            {hasFeatured
+              ? 'Add a featured basket below, or browse the whole shop.'
+              : 'Browse the shop to find something sweet.'}
+          </p>
           <Link to="/shop" className={button}>
-            Start shopping <ArrowRight className="h-3.5 w-3.5" />
+            Start shopping <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" />
           </Link>
         </>
       ) : (
@@ -80,10 +102,14 @@ function BasketSummary({ onOpenCart }) {
             {count} {count === 1 ? 'item' : 'items'} · reserve now, pay at pickup
           </p>
           <button onClick={onOpenCart} className={button}>
-            View basket <ArrowRight className="h-3.5 w-3.5" />
+            View basket <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" />
           </button>
         </>
       )}
+      {/* Announces basket changes to screen readers without moving focus. */}
+      <p role="status" className="sr-only">
+        {count > 0 ? `Basket: ${count} ${count === 1 ? 'item' : 'items'}, $${total.toFixed(2)}` : ''}
+      </p>
     </div>
   )
 }
@@ -95,13 +121,17 @@ function FeaturedItem({ product, occasionId }) {
     <div className="flex w-40 shrink-0 snap-start flex-col overflow-hidden rounded-2xl bg-[hsl(var(--background))] ring-1 ring-[hsl(var(--border))] lg:w-auto">
       <Link to={`/shop#${occasionId}`} className="group block" tabIndex={-1} aria-hidden="true">
         <div className="aspect-square overflow-hidden bg-[hsl(var(--muted))]">
-          {product.image && (
+          {product.image ? (
             <img
               src={product.image}
               alt=""
               loading="lazy"
               className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
             />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-sm text-[hsl(var(--muted-foreground))]">
+              No image
+            </div>
           )}
         </div>
       </Link>
@@ -119,8 +149,8 @@ function FeaturedItem({ product, occasionId }) {
           <span className="font-heading text-base font-bold">${product.price.toFixed(2)}</span>
           <button
             onClick={add}
-            aria-label={`Add ${product.name} to basket`}
-            className={`rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition ${
+            aria-label={added ? `${product.name} added to basket` : `Add ${product.name} to basket`}
+            className={`shrink-0 whitespace-nowrap rounded-full px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition ${
               added ? 'bg-[#d8ef9c] text-[#0A0A0A]' : 'bg-[#0A0A0A] text-[#d8ef9c] hover:bg-[#1a1a1a]'
             }`}
           >
@@ -135,10 +165,16 @@ function FeaturedItem({ product, occasionId }) {
 export default function Dashboard({ onOpenCart }) {
   const { products, loading } = useProducts()
   const inStock = products.filter((p) => p.available)
-  // One in-stock basket per occasion, in the same order as the shop.
+  // One in-stock basket per occasion, in the same order as the shop, preferring ones with a photo.
   const featured = occasions
-    .map((o) => ({ occasionId: o.id, product: inStock.find((p) => p.occasion === o.title) }))
+    .map((o) => {
+      const matches = inStock.filter((p) => p.occasion === o.title)
+      return { occasionId: o.id, product: matches.find((p) => p.image) ?? matches[0] }
+    })
     .filter((f) => f.product)
+  const showFeatured = loading || featured.length > 0
+  const stripRef = useRef(null)
+  const stripOverflows = useOverflowsX(stripRef, [loading, featured.length])
 
   const tiles = sections.map((s) =>
     s.id === 'giftbaskets'
@@ -165,7 +201,8 @@ export default function Dashboard({ onOpenCart }) {
             to="/shop"
             className="group inline-flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wider text-[#0A0A0A]"
           >
-            See everything <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+            See everything{' '}
+            <ArrowRight aria-hidden="true" className="h-4 w-4 transition group-hover:translate-x-1" />
           </Link>
         </div>
 
@@ -176,7 +213,7 @@ export default function Dashboard({ onOpenCart }) {
             ))}
           </div>
           <div className="flex flex-col gap-3">
-            <BasketSummary onOpenCart={onOpenCart} />
+            <BasketSummary onOpenCart={onOpenCart} hasFeatured={showFeatured} />
             <div className="grid grid-cols-3 gap-2">
               {quickActions.map(({ label, href, icon: Icon, external }) => (
                 <a
@@ -186,7 +223,7 @@ export default function Dashboard({ onOpenCart }) {
                   rel={external ? 'noreferrer' : undefined}
                   className="flex flex-col items-center gap-1.5 rounded-2xl p-3 text-xs font-semibold ring-1 ring-[hsl(var(--border))] transition hover:bg-[#d8ef9c]/30 hover:ring-[#d8ef9c]"
                 >
-                  <Icon className="h-5 w-5 text-[#0A0A0A]/70" />
+                  <Icon aria-hidden="true" className="h-5 w-5 text-[#0A0A0A]/70" />
                   {label}
                 </a>
               ))}
@@ -194,12 +231,25 @@ export default function Dashboard({ onOpenCart }) {
           </div>
         </div>
 
-        {(loading || featured.length > 0) && (
+        {showFeatured && (
           <div className="mt-8 border-t border-[hsl(var(--border))] pt-6">
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-[hsl(var(--muted-foreground))]">
-              Featured baskets
-            </h3>
-            <div className="-mx-6 flex snap-x snap-mandatory scroll-px-6 gap-4 overflow-x-auto px-6 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] md:-mx-8 md:scroll-px-8 md:px-8 md:pb-3 md:[scrollbar-width:thin] lg:mx-0 lg:grid lg:grid-cols-5 lg:overflow-visible lg:scroll-px-0 lg:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden md:[&::-webkit-scrollbar]:block">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-[hsl(var(--muted-foreground))]">
+                Featured baskets
+              </h3>
+              {stripOverflows && (
+                <span
+                  aria-hidden="true"
+                  className="inline-flex items-center gap-1 text-xs text-[hsl(var(--muted-foreground))] lg:hidden"
+                >
+                  Swipe for more <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+              )}
+            </div>
+            <div
+              ref={stripRef}
+              className="-mx-6 flex snap-x snap-mandatory scroll-px-6 gap-4 overflow-x-auto px-6 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] md:-mx-8 md:scroll-px-8 md:px-8 md:pb-3 md:[scrollbar-width:thin] lg:mx-0 lg:grid lg:auto-cols-fr lg:grid-flow-col lg:overflow-visible lg:scroll-px-0 lg:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden md:[&::-webkit-scrollbar]:block"
+            >
               {loading
                 ? occasions.map((o) => (
                     <div

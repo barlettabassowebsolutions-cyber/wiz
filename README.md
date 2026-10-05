@@ -47,6 +47,19 @@ needs.
 Shoppers add baskets to the cart, enter a name, phone, and pickup day, and reserve the order for
 in-store pickup. The cart persists in `localStorage`.
 
+## Product photos
+
+The 13 starting products use photos in `public/products/` (WebP, 960×720), one per basket, named
+after it (`sympathy-tea-basket.webp` and so on). They are AI-generated stand-ins that match each
+basket's description until real photos of the shop's baskets are available.
+
+To use a real photo, either replace the file in `public/products/` with one of the same name and
+redeploy, or paste the photo's URL into the product's *Image URL* in `/admin`. Landscape 4:3 photos
+fit the product cards best.
+
+The landing-page background is `src/assets/chocolate-case.avif`, with a `.jpg` fallback for older
+browsers.
+
 ## Data and admin access
 
 The original runs on Base44's hosted backend. This replica has no server. `src/api/client.js`
