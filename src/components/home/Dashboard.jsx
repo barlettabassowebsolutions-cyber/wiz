@@ -23,7 +23,7 @@ import { useProducts } from '@/lib/useProducts'
 const sections = [
   { id: 'giftbaskets', label: 'Gift Baskets', icon: ShoppingBasket },
   { id: 'candy', label: 'Candy', hint: 'Nostalgic & gourmet', icon: Cookie },
-  { id: 'dietary', label: 'Dietary-Friendly', hint: 'Nut, gluten & dairy free', icon: Leaf },
+  { id: 'dietary', label: 'Dietary', hint: 'Nut, gluten & dairy free', icon: Leaf },
   { id: 'weddings', label: 'Weddings', hint: 'Favors & centerpieces', icon: Heart },
   { id: 'corporate', label: 'Corporate', hint: 'Client & staff gifts', icon: Briefcase },
   { id: 'birthdayparties', label: 'Parties', hint: 'Candy buffets & favors', icon: PartyPopper },
@@ -170,7 +170,7 @@ export default function Dashboard({ onOpenCart }) {
         </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-3">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:col-span-2">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:col-span-2">
             {tiles.map((t) => (
               <SectionTile key={t.id} {...t} />
             ))}
@@ -199,7 +199,7 @@ export default function Dashboard({ onOpenCart }) {
             <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-[hsl(var(--muted-foreground))]">
               Featured baskets
             </h3>
-            <div className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] md:-mx-8 md:px-8 lg:mx-0 lg:grid lg:grid-cols-5 lg:overflow-visible lg:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden">
+            <div className="-mx-6 flex snap-x snap-mandatory scroll-px-6 gap-4 overflow-x-auto px-6 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] md:-mx-8 md:scroll-px-8 md:px-8 md:pb-3 md:[scrollbar-width:thin] lg:mx-0 lg:grid lg:grid-cols-5 lg:overflow-visible lg:scroll-px-0 lg:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden md:[&::-webkit-scrollbar]:block">
               {loading
                 ? occasions.map((o) => (
                     <div

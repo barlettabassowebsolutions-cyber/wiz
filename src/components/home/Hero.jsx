@@ -26,7 +26,7 @@ export default function Hero({ onAbout }) {
         </div>
         <p className="font-script text-2xl text-[#d8ef9c] md:text-3xl">It is so sweet of you to stop by!</p>
         <h1 className="mt-3 font-heading text-4xl font-bold tracking-tight text-white md:text-6xl">Wrapping It Up</h1>
-        <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-white/85 md:text-lg">
+        <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-white/90 md:text-lg">
           A cozy little shop in Amityville filled with hand-wrapped gift baskets, sweets, treats, and thoughtful gifts
           for every occasion. Take a look around — we're so glad you're here.
         </p>
