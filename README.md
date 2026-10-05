@@ -12,6 +12,20 @@ npm run build     # production build in dist/
 npm run preview   # serve the production build
 ```
 
+## Deploy to Netlify
+
+`netlify.toml` already sets the build command (`npm run build`), the publish folder (`dist`), Node 20,
+and the redirect that lets `/shop` and `/admin` load on refresh.
+
+- **From Git:** push this folder to a GitHub repo, then in Netlify choose *Add new site → Import an
+  existing project* and pick the repo. Netlify reads the settings from `netlify.toml`.
+- **Drag and drop:** run `npm install && npm run build`, then drag the `dist` folder onto
+  [app.netlify.com/drop](https://app.netlify.com/drop).
+- **CLI:** `npx netlify-cli deploy --prod` (it runs the build from `netlify.toml`).
+
+To change the admin passcode, add `VITE_ADMIN_PASSCODE` under *Site configuration → Environment
+variables* in Netlify, then redeploy. It is read at build time.
+
 ## Pages
 
 | Route    | What it is                                                                  |
