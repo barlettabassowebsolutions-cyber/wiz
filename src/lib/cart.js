@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 const STORAGE_KEY = 'wiu_cart'
 const listeners = new Set()
@@ -52,3 +52,21 @@ export const cart = {
 export const useCartItems = () => useSyncExternalStore(cart.subscribe, cart.getItems, () => [])
 export const useCartCount = () => useSyncExternalStore(cart.subscribe, cart.getCount, () => 0)
 export const useCartTotal = () => useSyncExternalStore(cart.subscribe, cart.getTotal, () => 0)
+
+// Adds a product and flips `added` on for a moment so the button can say "Added ✓".
+export function useAddToCart(product) {
+  const [added, setAdded] = useState(false)
+  const timer = useRef()
+
+  useEffect(() => () => clearTimeout(timer.current), [])
+
+  function add() {
+    if (!product.available) return
+    cart.add(product)
+    setAdded(true)
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => setAdded(false), 1200)
+  }
+
+  return [added, add]
+}

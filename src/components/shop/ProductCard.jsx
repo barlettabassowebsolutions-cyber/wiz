@@ -1,15 +1,7 @@
-import { useState } from 'react'
-import { cart } from '@/lib/cart'
+import { useAddToCart } from '@/lib/cart'
 
 export default function ProductCard({ product }) {
-  const [added, setAdded] = useState(false)
-
-  function handleAdd() {
-    if (!product.available) return
-    cart.add(product)
-    setAdded(true)
-    setTimeout(() => setAdded(false), 1200)
-  }
+  const [added, handleAdd] = useAddToCart(product)
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-[hsl(var(--card))] shadow-sm ring-1 ring-[hsl(var(--border))] transition hover:shadow-md">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -18,8 +18,8 @@ import {
   ShoppingBasket,
   Sparkles,
 } from 'lucide-react'
-import { client } from '@/api/client'
-import { SHOP } from '@/lib/shop-info'
+import { occasions, SHOP } from '@/lib/shop-info'
+import { useProducts } from '@/lib/useProducts'
 import Footer from '@/components/Footer'
 import Testimonials from '@/components/Testimonials'
 import ShopNav from '@/components/shop/ShopNav'
@@ -27,14 +27,6 @@ import OccasionSection from '@/components/shop/OccasionSection'
 import ServiceSection from '@/components/shop/ServiceSection'
 import BottomBar from '@/components/shop/BottomBar'
 import CartDrawer from '@/components/shop/CartDrawer'
-
-export const occasions = [
-  { id: 'birthday', title: 'Birthday', tagline: 'Make their day extra sweet' },
-  { id: 'holiday', title: 'Holiday', tagline: "Season's greetings, wrapped up" },
-  { id: 'getwell', title: 'Get Well', tagline: 'A little comfort to speed recovery' },
-  { id: 'sympathy', title: 'Sympathy', tagline: 'Thoughtful gestures, gently given' },
-  { id: 'justbecause', title: 'Just Because', tagline: 'No reason needed — just kindness' },
-]
 
 const services = [
   {
@@ -161,16 +153,8 @@ const contactCard =
   'flex flex-col items-center gap-2 rounded-2xl bg-[hsl(var(--card))] p-6 ring-1 ring-[hsl(var(--border))]'
 
 export default function Shop() {
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
+  const { products, loading } = useProducts()
   const [cartOpen, setCartOpen] = useState(false)
-
-  useEffect(() => {
-    client.entities.Product.list('-created_date', 100)
-      .then((rows) => setProducts(Array.isArray(rows) ? rows : []))
-      .catch(() => setProducts([]))
-      .finally(() => setLoading(false))
-  }, [])
 
   return (
     <div className="pb-20">

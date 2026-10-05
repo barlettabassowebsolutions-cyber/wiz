@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { client } from '@/api/client'
-import { occasions } from '@/pages/Shop'
+import { occasions } from '@/lib/shop-info'
 
 const fieldClass = 'w-full rounded-lg border border-[hsl(var(--input))] px-3 py-2'
 
