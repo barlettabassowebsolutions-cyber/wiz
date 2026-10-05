@@ -14,17 +14,26 @@ npm run preview   # serve the production build
 
 ## Deploy to Netlify
 
-`netlify.toml` already sets the build command (`npm run build`), the publish folder (`dist`), Node 20,
+`netlify.toml` already sets the build command (`npm run build`), the publish folder (`dist`), Node 22,
 and the redirect that lets `/shop` and `/admin` load on refresh.
 
-- **From Git:** push this folder to a GitHub repo, then in Netlify choose *Add new site → Import an
+- **From Git:** push this folder to a GitHub repo, then in Netlify choose *Add new project → Import an
   existing project* and pick the repo. Netlify reads the settings from `netlify.toml`.
 - **Drag and drop:** run `npm install && npm run build`, then drag the `dist` folder onto
   [app.netlify.com/drop](https://app.netlify.com/drop).
-- **CLI:** `npx netlify-cli deploy --prod` (it runs the build from `netlify.toml`).
+- **CLI:** `npm install && npx netlify-cli deploy --prod` (it runs the build from `netlify.toml`; the
+  first run asks you to log in and link a project).
 
-To change the admin passcode, add `VITE_ADMIN_PASSCODE` under *Site configuration → Environment
-variables* in Netlify, then redeploy. It is read at build time.
+The admin passcode is baked in when the site is built:
+
+- Git or CLI deploys: add `VITE_ADMIN_PASSCODE` under *Project configuration → Environment variables*,
+  then redeploy. Add it as a normal variable. Don't tick *Contains secret values*: the passcode ends
+  up in the public JavaScript, so Netlify's secret scanner would find it and fail the deploy.
+- Drag and drop: put `VITE_ADMIN_PASSCODE=yourcode` in a `.env` file before `npm run build`.
+  Netlify doesn't rebuild dropped files, so its environment variables don't apply.
+
+Leave `NODE_ENV` unset in Netlify. Setting it to `production` skips the dev dependencies the build
+needs.
 
 ## Pages
 
