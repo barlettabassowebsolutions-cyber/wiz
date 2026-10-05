@@ -1,0 +1,54 @@
+import { useSyncExternalStore } from 'react'
+
+const STORAGE_KEY = 'wiu_cart'
+const listeners = new Set()
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
+let items = load()
+
+function save(next) {
+  items = next
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+  } catch {}
+  listeners.forEach((fn) => fn())
+}
+
+export const cart = {
+  getItems: () => items,
+  add(product) {
+    if (items.find((i) => i.id === product.id)) {
+      save(items.map((i) => (i.id === product.id ? { ...i, qty: i.qty + 1 } : i)))
+    } else {
+      const { id, name, price, image } = product
+      save([...items, { id, name, price, image, qty: 1 }])
+    }
+  },
+  setQty(id, qty) {
+    save(qty <= 0 ? items.filter((i) => i.id !== id) : items.map((i) => (i.id === id ? { ...i, qty } : i)))
+  },
+  remove(id) {
+    save(items.filter((i) => i.id !== id))
+  },
+  clear() {
+    save([])
+  },
+  getCount: () => items.reduce((sum, i) => sum + i.qty, 0),
+  getTotal: () => items.reduce((sum, i) => sum + i.qty * i.price, 0),
+  subscribe(fn) {
+    listeners.add(fn)
+    return () => listeners.delete(fn)
+  },
+}
+
+export const useCartItems = () => useSyncExternalStore(cart.subscribe, cart.getItems, () => [])
+export const useCartCount = () => useSyncExternalStore(cart.subscribe, cart.getCount, () => 0)
+export const useCartTotal = () => useSyncExternalStore(cart.subscribe, cart.getTotal, () => 0)

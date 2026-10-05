@@ -1,0 +1,28 @@
+export const SHOP = {
+  name: 'Wrapping It Up',
+  street: '180 Park Avenue',
+  cityLine: 'Amityville, NY 11701',
+  shortAddress: '180 Park Avenue, Amityville, NY',
+  phone: '(631) 598-4400',
+  tel: 'tel:6315984400',
+  facebook: 'https://www.facebook.com/wrappingitup',
+  logo: 'https://static.wixstatic.com/media/953fcd_d5d611dbcf814a578560eb2c02c3a47d~mv2.jpg',
+}
+
+export const testimonials = [
+  {
+    text: "The most beautiful gift basket I've ever received — you can tell it was made with love.",
+    name: 'Maria D.',
+    place: 'Lindenhurst',
+  },
+  {
+    text: 'They wrapped our wedding favors and they were stunning. Every single guest commented on them.',
+    name: 'Jenna & Mike',
+    place: 'Babylon',
+  },
+  {
+    text: 'Called in a last-minute corporate order and they delivered same-day. Absolute lifesavers!',
+    name: 'Tom R.',
+    place: 'Deer Park',
+  },
+]

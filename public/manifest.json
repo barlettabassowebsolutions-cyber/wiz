@@ -1,0 +1,9 @@
+{
+  "name": "Wrapping It Up — Amityville Gift Shop",
+  "short_name": "Wrapping It Up Express",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fcfbf8",
+  "theme_color": "#0A0A0A",
+  "icons": [{ "src": "/logo.png", "sizes": "1024x1024", "type": "image/png" }]
+}
